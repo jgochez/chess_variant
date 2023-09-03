@@ -1,6 +1,6 @@
 # chess_variant
 
-**Remember that this project cannot be submitted late.**
+
 
 Write a class named **ChessVar** for playing an abstract board game that is a variant of chess. The following explanation of the rules assumes some familiarity with the rules of chess - specifically how the pieces move and capture, and what it means for a king to be "in check". If you have any questions about those rules, please don't hesitate to ask.
 
@@ -12,7 +12,6 @@ You will need to keep track of which player's turn it is. As in standard chess, 
 
 Locations on the board will be specified using "algebraic notation", with columns labeled a-h and rows labeled 1-8, with row 1 being the start side and row 8 the finish side, as shown in the diagram above.
 
-You're not required to have a function that prints the board, but you will probably find it very useful for testing purposes.
 
 Your ChessVar class must include the following:
 * An **init method** that initializes any data members
@@ -28,4 +27,4 @@ move_result = game.make_move('c2', 'e3')
 game.make_move('g1', 'f1')
 state = game.get_game_state()
 ```
-The file must be named: **ChessVar.py**
+
