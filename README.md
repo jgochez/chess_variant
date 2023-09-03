@@ -1,4 +1,4 @@
-# portfolio-project
+# chess_variant
 
 **Remember that this project cannot be submitted late.**
 
