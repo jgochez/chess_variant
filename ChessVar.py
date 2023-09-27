@@ -386,232 +386,6 @@ class ChessVar:
         else:
             return False
 
-    def make_move(self, current_pos, new_pos):
-        """
-        this method is the heart of the program where all validations of
-        moves and modifications of the live board corresponding to the
-        move are made
-        """
-        # Check for winner before ANYTHING
-        check_for_winner = self.check_for_winner()
-        if check_for_winner is True:
-
-            # Validate if input locations are valid:
-            location_results = self.check_location(current_pos, new_pos)
-            if location_results is True:
-
-                # Convert chess board dimensions into indices:
-                cur_row_index, cur_col_index, new_row_index, new_col_index = self.find_index(current_pos, new_pos)
-                current_piece = self._liveBoard[cur_row_index][cur_col_index]
-                new_location = self._liveBoard[new_row_index][new_col_index]
-
-                # Validate if square has a piece:
-                if current_piece == '___':
-                    print("Invalid move, no chess piece found in that location.")
-                    return False
-
-                # Validate move if Rook:
-                if current_piece[2] == "R":
-                    check_player = self._check_for_player
-                    validate_rook = self.check_rook(cur_row_index, cur_col_index, new_row_index, new_col_index)
-                    obstruction_check_rook = self.check_obstruction_for_rook(cur_row_index, cur_col_index,
-                                                                             new_row_index,
-                                                                             new_col_index)
-
-                    # validate if current piece matches current player
-                    if ((check_player % 2) == 0 and current_piece[0] == 'W') or (
-                            (check_player % 2) > 0 and current_piece[0] == 'B'):
-                        # validate Rook can execute the move
-                        if validate_rook is True:
-                            # validate Rook wasn't jumping over any piece
-                            if obstruction_check_rook is True:
-                                check_king_check = self.check_king_check(current_piece, cur_row_index, cur_col_index,
-                                                                         new_row_index,
-                                                                         new_col_index)
-                                # validate move wouldn't leave any king in check
-                                if check_king_check is True:
-                                    # validate player's piece will not land on another player's piece
-                                    if current_piece[0] != new_location[0]:
-                                        self._liveBoard[cur_row_index][cur_col_index] = "___"
-                                        self._liveBoard[new_row_index][new_col_index] = current_piece
-
-                                        # Even value means current player is WHITE
-                                        if (check_player % 2) == 0:
-                                            print("Player WHITE just moved.")
-                                            self._check_for_player += 1
-                                            return True
-                                        # Odd value means current player is BLACK
-                                        else:
-                                            print("Player BLACK just moved.")
-                                            self._check_for_player += 1
-                                            self.check_for_winner()
-                                            return True
-                                    else:
-                                        print("Invalid move, you have a piece in that desired location.")
-                                        return False
-                                else:
-                                    print("Invalid move, a king would have been left in check.")
-                                    return False
-                            else:
-                                print("Invalid move, your rook is not allowed to jump over pieces.")
-                                return False
-                        else:
-                            print("Invalid move, Rook is not allowed to execute that movement.")
-                            return False
-                    else:
-                        print("Invalid move, you are attempting to move opponent's piece.")
-                        return False
-
-                # Validate move if piece is Bishop:
-                if current_piece[2] == 'B':
-                    check_player = self._check_for_player
-                    validate_bishop = self.check_bishop(cur_row_index, cur_col_index, new_row_index, new_col_index)
-                    obstruction_check_bishop = self.check_obstruction_for_bishop(cur_row_index, cur_col_index,
-                                                                                 new_row_index, new_col_index)
-                    # validate if current piece matches current player
-                    if ((check_player % 2) == 0 and current_piece[0] == 'W') or (
-                            (check_player % 2) > 0 and current_piece[0] == 'B'):
-                        # validate Bishop can execute the move
-                        if validate_bishop is True:
-                            # validate Bishop wasn't jumping over any piece
-                            if obstruction_check_bishop is True:
-                                check_king_check = self.check_king_check(current_piece, cur_row_index, cur_col_index,
-                                                                         new_row_index,
-                                                                         new_col_index)
-                                # validate move wouldn't leave any king in check
-                                if check_king_check is True:
-                                    # validate player's piece will not land on another player's piece
-                                    if current_piece[0] != new_location[0]:
-                                        self._liveBoard[cur_row_index][cur_col_index] = "___"
-                                        self._liveBoard[new_row_index][new_col_index] = current_piece
-
-                                        # Even value means current player is WHITE
-                                        if (check_player % 2) == 0:
-                                            print("Player WHITE just moved.")
-                                            self._check_for_player += 1
-                                            return True
-
-                                        # Odd value means current player is BLACK
-                                        else:
-                                            print("Player BLACK just moved.")
-                                            self._check_for_player += 1
-                                            self.check_for_winner()
-                                            return True
-                                    else:
-                                        print("Invalid move, you have a piece in that desired location.")
-                                        return False
-                                else:
-                                    print("Invalid move, a king would have been left in check.")
-                                    return False
-                            else:
-                                print("Invalid move, your bishop is not allowed to jump over pieces.")
-                                return False
-                        else:
-                            print("Invalid move, Bishop is not allowed to execute that movement.")
-                            return False
-                    else:
-                        print("Invalid move, you are attempting to move opponent's piece.")
-                        return False
-
-                # Validate move if piece is Knight:
-                if current_piece[2] == 'N':
-                    check_player = self._check_for_player
-                    validate_knight = self.check_knight(cur_row_index, cur_col_index, new_row_index, new_col_index)
-
-                    # validate if current piece matches current player
-                    if ((check_player % 2) == 0 and current_piece[0] == 'W') or (
-                            (check_player % 2) > 0 and current_piece[0] == 'B'):
-                        # validate Knight can execute the move
-                        if validate_knight is True:
-                            check_king_check = self.check_king_check(current_piece, cur_row_index, cur_col_index,
-                                                                     new_row_index,
-                                                                     new_col_index)
-                            # validate move wouldn't leave any king in check
-                            if check_king_check is True:
-                                # validate player's piece will not land on another player's piece
-                                if current_piece[0] != new_location[0]:
-                                    self._liveBoard[cur_row_index][cur_col_index] = "___"
-                                    self._liveBoard[new_row_index][new_col_index] = current_piece
-
-                                    # Even value means current player is WHITE
-                                    if (check_player % 2) == 0:
-                                        print("Player WHITE just moved.")
-                                        self._check_for_player += 1
-                                        return True
-
-                                    # Odd value means current player is BLACK
-                                    else:
-                                        print("Player BLACK just moved.")
-                                        self._check_for_player += 1
-                                        self.check_for_winner()
-                                        return True
-                                else:
-                                    print("Invalid move, you have a piece in that desired location.")
-                                    return False
-                            else:
-                                print("Invalid move, a king would have been left in check.")
-                                return False
-                        else:
-                            print("Invalid move,Knight is not allowed to execute that movement.")
-                            return False
-                    else:
-                        print("Invalid move, you are attempting to move opponent's piece.")
-                        return False
-
-                # Validate move if piece is King:
-                if current_piece[2] == 'K':
-                    check_player = self._check_for_player
-                    validate_king = self.check_king(cur_row_index, cur_col_index, new_row_index, new_col_index)
-                    # validate if current piece matches current player
-                    if ((check_player % 2) == 0 and current_piece[0] == 'W') or (
-                            (check_player % 2) > 0 and current_piece[0] == 'B'):
-                        # validate King can execute the move
-                        if validate_king is True:
-                            check_king_check = self.check_king_check(current_piece, cur_row_index, cur_col_index,
-                                                                     new_row_index,
-                                                                     new_col_index)
-                            # validate move wouldn't leave any king in check
-                            if check_king_check is True:
-                                # validate player's piece will not land on another player's piece
-                                if current_piece[0] != new_location[0]:
-                                    self._liveBoard[cur_row_index][cur_col_index] = "___"
-                                    self._liveBoard[new_row_index][new_col_index] = current_piece
-
-                                    # Even value means current player is WHITE
-                                    if (check_player % 2) == 0:
-                                        print("Player WHITE just moved.")
-                                        self._check_for_player += 1
-                                        return True
-
-                                    # Odd value means current player is BLACK
-                                    else:
-                                        print("Player BLACK just moved.")
-                                        self._check_for_player += 1
-                                        self.check_for_winner()
-                                        return True
-                                else:
-                                    print("Invalid move, you have a piece in that desired location.")
-                                    return False
-                            else:
-                                print("Invalid move, a king would have been left in check.")
-                                return False
-                        else:
-                            print("Invalid move, King is not allowed to execute that movement.")
-                            return False
-                    else:
-                        print("Invalid move, you are attempting to move opponent's piece.")
-                        return False
-
-            # if location input validations came back False
-            else:
-                print("Invalid move, location does not exist.")
-                return False
-
-        # if game has been won or tied resulting with False
-        else:
-            print("No more plays allowed.")
-            return False
-
     def check_for_winner(self):
         """
         occurring after every move, checking game
@@ -640,121 +414,210 @@ class ChessVar:
         else:
             return True
 
-    def get_game_state(self):
+    def make_move(self, current_pos, new_pos):
         """
-        called from the main function, live updates of
-        game status are provided by this method
+        this method is the heart of the program where all validations of
+        moves and modifications of the live board corresponding to the
+        move are made
         """
-        finish_line_count = 0
-        winner_initials = []
-        finish_line = self._liveBoard[0]
-        for cell in finish_line:
-            if cell[2] == 'K':
-                finish_line_count += 1
-                winner_initials.append(cell[0])
-        if (self._check_for_player % 2) == 0:
-            if 'W' in winner_initials and 'B' in winner_initials:
-                return "TIE"
-            if 'W' in winner_initials and 'B' not in winner_initials:
-                return "WHITE_WON"
-            if 'W' not in winner_initials and 'B' in winner_initials:
-                return "BLACK_WON"
-            else:
-                return "UNFINISHED"
+        # Validate if input locations are valid:
+        location_results = self.check_location(current_pos, new_pos)
+        if location_results is True:
+
+            # Convert chess board dimensions into indices:
+            cur_row_index, cur_col_index, new_row_index, new_col_index = self.find_index(current_pos, new_pos)
+            current_piece = self._liveBoard[cur_row_index][cur_col_index]
+            new_location = self._liveBoard[new_row_index][new_col_index]
+
+            # Validate if square has a piece:
+            if current_piece == '___':
+                print("Invalid move, no chess piece found in that location.")
+
+            # Validate move if Rook:
+            if current_piece[2] == "R":
+                check_player = self._check_for_player
+                validate_rook = self.check_rook(cur_row_index, cur_col_index, new_row_index, new_col_index)
+                obstruction_check_rook = self.check_obstruction_for_rook(cur_row_index, cur_col_index,
+                                                                         new_row_index,
+                                                                         new_col_index)
+
+                # validate if current piece matches current player
+                if ((check_player % 2) == 0 and current_piece[0] == 'W') or (
+                        (check_player % 2) > 0 and current_piece[0] == 'B'):
+                    # validate Rook can execute the move
+                    if validate_rook is True:
+                        # validate Rook wasn't jumping over any piece
+                        if obstruction_check_rook is True:
+                            check_king_check = self.check_king_check(current_piece, cur_row_index, cur_col_index,
+                                                                     new_row_index,
+                                                                     new_col_index)
+                            # validate move wouldn't leave any king in check
+                            if check_king_check is True:
+                                # validate player's piece will not land on another player's piece
+                                if current_piece[0] != new_location[0]:
+                                    self._liveBoard[cur_row_index][cur_col_index] = "___"
+                                    self._liveBoard[new_row_index][new_col_index] = current_piece
+
+                                    # Even value means current player is WHITE
+                                    if (check_player % 2) == 0:
+                                        print("Player WHITE just moved.")
+                                        self._check_for_player += 1
+                                    # Odd value means current player is BLACK
+                                    else:
+                                        print("Player BLACK just moved.")
+                                        self._check_for_player += 1
+                                        self.check_for_winner()
+                                else:
+                                    print("Invalid move, you have a piece in that desired location.")
+                            else:
+                                print("Invalid move, a king would have been left in check.")
+                        else:
+                            print("Invalid move, your rook is not allowed to jump over pieces.")
+                    else:
+                        print("Invalid move, Rook is not allowed to execute that movement.")
+                else:
+                    print("Invalid move, you are attempting to move opponent's piece.")
+
+            # Validate move if piece is Bishop:
+            if current_piece[2] == 'B':
+                check_player = self._check_for_player
+                validate_bishop = self.check_bishop(cur_row_index, cur_col_index, new_row_index, new_col_index)
+                obstruction_check_bishop = self.check_obstruction_for_bishop(cur_row_index, cur_col_index,
+                                                                             new_row_index, new_col_index)
+                # validate if current piece matches current player
+                if ((check_player % 2) == 0 and current_piece[0] == 'W') or (
+                        (check_player % 2) > 0 and current_piece[0] == 'B'):
+                    # validate Bishop can execute the move
+                    if validate_bishop is True:
+                        # validate Bishop wasn't jumping over any piece
+                        if obstruction_check_bishop is True:
+                            check_king_check = self.check_king_check(current_piece, cur_row_index, cur_col_index,
+                                                                     new_row_index,
+                                                                     new_col_index)
+                            # validate move wouldn't leave any king in check
+                            if check_king_check is True:
+                                # validate player's piece will not land on another player's piece
+                                if current_piece[0] != new_location[0]:
+                                    self._liveBoard[cur_row_index][cur_col_index] = "___"
+                                    self._liveBoard[new_row_index][new_col_index] = current_piece
+
+                                    # Even value means current player is WHITE
+                                    if (check_player % 2) == 0:
+                                        print("Player WHITE just moved.")
+                                        self._check_for_player += 1
+
+                                    # Odd value means current player is BLACK
+                                    else:
+                                        print("Player BLACK just moved.")
+                                        self._check_for_player += 1
+                                        self.check_for_winner()
+                                else:
+                                    print("Invalid move, you have a piece in that desired location.")
+                            else:
+                                print("Invalid move, a king would have been left in check.")
+                        else:
+                            print("Invalid move, your bishop is not allowed to jump over pieces.")
+                    else:
+                        print("Invalid move, Bishop is not allowed to execute that movement.")
+                else:
+                    print("Invalid move, you are attempting to move opponent's piece.")
+
+            # Validate move if piece is Knight:
+            if current_piece[2] == 'N':
+                check_player = self._check_for_player
+                validate_knight = self.check_knight(cur_row_index, cur_col_index, new_row_index, new_col_index)
+
+                # validate if current piece matches current player
+                if ((check_player % 2) == 0 and current_piece[0] == 'W') or (
+                        (check_player % 2) > 0 and current_piece[0] == 'B'):
+                    # validate Knight can execute the move
+                    if validate_knight is True:
+                        check_king_check = self.check_king_check(current_piece, cur_row_index, cur_col_index,
+                                                                 new_row_index,
+                                                                 new_col_index)
+                        # validate move wouldn't leave any king in check
+                        if check_king_check is True:
+                            # validate player's piece will not land on another player's piece
+                            if current_piece[0] != new_location[0]:
+                                self._liveBoard[cur_row_index][cur_col_index] = "___"
+                                self._liveBoard[new_row_index][new_col_index] = current_piece
+
+                                # Even value means current player is WHITE
+                                if (check_player % 2) == 0:
+                                    print("Player WHITE just moved.")
+                                    self._check_for_player += 1
+
+                                # Odd value means current player is BLACK
+                                else:
+                                    print("Player BLACK just moved.")
+                                    self._check_for_player += 1
+                                    self.check_for_winner()
+                            else:
+                                print("Invalid move, you have a piece in that desired location.")
+                        else:
+                            print("Invalid move, a king would have been left in check.")
+                    else:
+                        print("Invalid move,Knight is not allowed to execute that movement.")
+                else:
+                    print("Invalid move, you are attempting to move opponent's piece.")
+
+            # Validate move if piece is King:
+            if current_piece[2] == 'K':
+                check_player = self._check_for_player
+                validate_king = self.check_king(cur_row_index, cur_col_index, new_row_index, new_col_index)
+                # validate if current piece matches current player
+                if ((check_player % 2) == 0 and current_piece[0] == 'W') or (
+                        (check_player % 2) > 0 and current_piece[0] == 'B'):
+                    # validate King can execute the move
+                    if validate_king is True:
+                        check_king_check = self.check_king_check(current_piece, cur_row_index, cur_col_index,
+                                                                 new_row_index,
+                                                                 new_col_index)
+                        # validate move wouldn't leave any king in check
+                        if check_king_check is True:
+                            # validate player's piece will not land on another player's piece
+                            if current_piece[0] != new_location[0]:
+                                self._liveBoard[cur_row_index][cur_col_index] = "___"
+                                self._liveBoard[new_row_index][new_col_index] = current_piece
+
+                                # Even value means current player is WHITE
+                                if (check_player % 2) == 0:
+                                    print("Player WHITE just moved.")
+                                    self._check_for_player += 1
+
+                                # Odd value means current player is BLACK
+                                else:
+                                    print("Player BLACK just moved.")
+                                    self._check_for_player += 1
+                                    self.check_for_winner()
+                            else:
+                                print("Invalid move, you have a piece in that desired location.")
+                        else:
+                            print("Invalid move, a king would have been left in check.")
+                    else:
+                        print("Invalid move, King is not allowed to execute that movement.")
+                else:
+                    print("Invalid move, you are attempting to move opponent's piece.")
+
+        # if location input validations came back False
         else:
-            return "UNFINISHED"
+            print("Invalid move, location does not exist.")
 
 
-def main():
+def ChessUI():
     chess_obj = ChessVar()
-    chess_obj.display_reference_board()
     chess_obj.display_live_board()
+    print("Player white first.")
+    check_for_winner = True
 
-    # Game Simulation begins: WHITE MOVES FIRST
-
-    chess_obj.make_move('b2', 'c3')  # LEGAL WHITE BISHOP MOVE
-    chess_obj.display_live_board()
-    chess_obj.make_move('h2', 'f3')  # ILLEGAL BLACK ROOK MOVE
-    chess_obj.display_live_board()
-    chess_obj.make_move('a2', 'a8')  # ILLEGAL WHITE ROOK MOVE
-    chess_obj.display_live_board()
-    chess_obj.make_move('h2', 'h7')  # LEGAL BLACK ROOK MOVE
-    chess_obj.display_live_board()
-    chess_obj.make_move('a2', 'a7')  # LEGAL WHITE ROOK MOVE
-    chess_obj.display_live_board()
-    game_state = chess_obj.get_game_state()  # GAME STATE = UNFINISHED
-    print(game_state)
-    chess_obj.make_move('h7', 'a7')  # ILLEGAL BLACK ROOK MOVE (WHITE KING WAS CHECK)
-    chess_obj.display_live_board()
-    chess_obj.make_move('h1', 'h2')  # LEGAL BLACK KING MOVE
-    chess_obj.display_live_board()
-    chess_obj.make_move('a1', 'a2')  # LEGAL WHITE KING MOVE
-    chess_obj.display_live_board()
-    chess_obj.make_move('h2', 'h3')  # LEGAL BLACK KING MOVE
-    chess_obj.display_live_board()
-    chess_obj.make_move('a2', 'a3')  # LEGAL WHITE KING MOVE
-    chess_obj.display_live_board()
-    chess_obj.make_move('h3', 'h4')  # LEGAL BLACK KING MOVE
-    chess_obj.display_live_board()
-    chess_obj.make_move('a3', 'a4')  # LEGAL WHITE KING MOVE
-    chess_obj.display_live_board()
-    chess_obj.make_move('h4', 'h5')  # LEGAL BLACK KING MOVE
-    chess_obj.display_live_board()
-    chess_obj.make_move('a4', 'a5')  # LEGAL WHITE KING MOVE
-    chess_obj.display_live_board()
-    chess_obj.make_move('h5', 'h6')  # LEGAL BLACK KING MOVE
-    chess_obj.display_live_board()
-    chess_obj.make_move('a5', 'a6')  # LEGAL WHITE KING MOVE
-    chess_obj.display_live_board()
-    game_state = chess_obj.get_game_state()  # GAME STATE = UNFINISHED
-    print(game_state)
-    chess_obj.make_move('a6', 'b7')  # ILLEGAL MOVE (BLACK CAN'T MOVE WHITE PIECE)
-    chess_obj.display_live_board()
-    chess_obj.make_move('h6', 'g7')  # ILLEGAL BLACK KING MOVE (WOULD LEAVE ITSELF IN CHECK)
-    chess_obj.display_live_board()
-    chess_obj.make_move('h7', 'c7')  # LEGAL BLACK ROOK MOVE
-    chess_obj.display_live_board()
-    chess_obj.make_move('a7', 'c7')  # LEGAL WHITE ROOK MOVE (BLACK ROOK CAPTURED)
-    chess_obj.display_live_board()
-    chess_obj.make_move('f1', 'd2')  # LEGAL BLACK KNIGHT MOVE
-    chess_obj.display_live_board()
-    chess_obj.make_move('c3', 'd2')  # ILLEGAL WHITE BISHOP MOVE (WHITE KING WOULD BE LEFT IN CHECK)
-    chess_obj.display_live_board()
-    chess_obj.make_move('c2', 'd4')  # LEGAL WHITE KNIGHT MOVE
-    chess_obj.display_live_board()
-    chess_obj.make_move('g1', 'h2')  # LEGAL BLACK BISHOP MOVE
-    chess_obj.display_live_board()
-    chess_obj.make_move('a6', 'a7')  # LEGAL WHITE KING MOVE
-    chess_obj.display_live_board()
-    chess_obj.make_move('h2', 'c7')  # LEGAL BLACK BISHOP MOVE (WHITE ROOK CAPTURED)
-    chess_obj.display_live_board()
-    chess_obj.make_move('c1', 'd3')  # LEGAL WHITE KNIGHT MOVE
-    chess_obj.display_live_board()
-    chess_obj.make_move('c7', 'a5')  # LEGAL BLACK BISHOP MOVE
-    chess_obj.display_live_board()
-    chess_obj.make_move('d4', 'e6')  # LEGAL WHITE KNIGHT MOVE
-    chess_obj.display_live_board()
-    chess_obj.make_move('h6', 'h7')  # LEGAL BLACK KING MOVE
-    chess_obj.display_live_board()
-    chess_obj.make_move('a7', 'b8')  # LEGAL WHITE KING MOVE
-    chess_obj.display_live_board()
-    game_state = chess_obj.get_game_state()  # GAME STATE = UNFINISHED
-    print(game_state)
-
-    ##### NOTE #####
-
-    # THIS MOVE WILL MAKE WHITE WIN
-    chess_obj.make_move('h7', 'g8')
-    chess_obj.display_live_board()
-    game_state = chess_obj.get_game_state()  # GAME STATE = WHITE_WON
-    print(game_state)
-
-    # THIS MOVE WILL MAKE TIE
-    # chess_obj.make_move('h7', 'h6')
-    # chess_obj.display_live_board()
-    # game_state = chess_obj.get_game_state()  # GAME STATE = TIE
-    # print(game_state)
+    while check_for_winner:
+        current_square = str(input("Choose your piece: "))
+        new_square = str(input("Choose new square: "))
+        chess_obj.make_move(current_square, new_square)
+        check_for_winner = chess_obj.check_for_winner()
+        chess_obj.display_live_board()
+    print("Game Over")
 
 
 if __name__ == "__main__":
-    main()
+    ChessUI()
